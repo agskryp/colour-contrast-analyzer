@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Colour Contrast Analyzer</title>
+	<style>
+		:root {
+			color: #231f20;
+			font-family: Arial, Helvetica, sans-serif;
+			background: #f2f2f6;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+		}
+
+		main {
+			max-width: 1600px;
+			margin: 0 auto;
+			padding: 32px;
+		}
+
+		h1,
+		h2 {
+			margin: 0;
+			line-height: 1.2;
+		}
+
+		h1 {
+			font-size: 32px;
+		}
+
+		h2 {
+			margin-top: 40px;
+			font-size: 24px;
+		}
+
+		p {
+			max-width: 880px;
+			margin: 12px 0 0;
+			line-height: 1.5;
+		}
+
+		.controls {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 16px;
+			margin-top: 24px;
+		}
+
+		.field {
+			display: grid;
+			gap: 8px;
+		}
+
+		label {
+			font-weight: 700;
+		}
+
+		textarea {
+			width: 100%;
+			min-height: 180px;
+			padding: 12px;
+			border: 1px solid rgba(35, 31, 32, 0.35);
+			background: #ffffff;
+			color: #231f20;
+			font: 14px/1.45 "Courier New", Courier, monospace;
+			resize: vertical;
+		}
+
+		textarea:focus-visible {
+			border-color: #4476ff;
+			outline: 2px solid #4476ff;
+			outline-offset: 2px;
+		}
+
+		.controls-actions {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			margin-top: 16px;
+		}
+
+		.apply-colours {
+			padding: 10px 14px;
+			border: 1px solid #231f20;
+			background: #231f20;
+			color: #ffffff;
+			font: inherit;
+			font-weight: 700;
+			cursor: pointer;
+		}
+
+		.apply-colours:hover,
+		.apply-colours:focus-visible {
+			outline: 2px solid #4476ff;
+			outline-offset: 2px;
+		}
+
+		.input-status {
+			margin: 0;
+			color: #8f1111;
+			font-weight: 700;
+		}
+
+		.summary {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 12px;
+			margin-top: 24px;
+		}
+
+		.summary-item {
+			display: block;
+			width: 100%;
+			padding: 16px;
+			border: 1px solid rgba(35, 31, 32, 0.18);
+			background: #ffffff;
+			color: #231f20;
+			font: inherit;
+			text-align: left;
+			cursor: pointer;
+		}
+
+		.summary-item:hover,
+		.summary-item:focus-visible,
+		.summary-item.is-active {
+			border-color: #4476ff;
+			outline: 2px solid #4476ff;
+			outline-offset: 2px;
+		}
+
+		.filter-status {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 16px;
+			margin-top: 16px;
+		}
+
+		.filter-status p {
+			margin: 0;
+		}
+
+		.clear-filter {
+			padding: 8px 12px;
+			border: 1px solid #231f20;
+			background: #ffffff;
+			color: #231f20;
+			font: inherit;
+			font-weight: 700;
+			cursor: pointer;
+		}
+
+		.clear-filter:hover,
+		.clear-filter:focus-visible {
+			outline: 2px solid #4476ff;
+			outline-offset: 2px;
+		}
+
+		.clear-filter[hidden],
+		.is-hidden {
+			display: none;
+		}
+
+		.summary-label,
+		.summary-value {
+			display: block;
+		}
+
+		.summary-label {
+			font-size: 12px;
+			font-weight: 700;
+			text-transform: uppercase;
+		}
+
+		.summary-value {
+			margin-top: 6px;
+			font-size: 24px;
+			font-weight: 700;
+		}
+
+		.colour-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+			gap: 12px;
+			margin-top: 20px;
+		}
+
+		.colour-sample {
+			min-height: 132px;
+			padding: 16px;
+			border: 1px solid rgba(35, 31, 32, 0.18);
+			overflow-wrap: anywhere;
+		}
+
+		.sample-text {
+			margin: 0;
+			font-weight: 700;
+			line-height: 1.35;
+		}
+
+		.sample-meta {
+			display: block;
+			margin-top: 12px;
+			padding: 8px;
+			font-size: 12px;
+			line-height: 1.45;
+			font-weight: 700;
+			background: rgba(255, 255, 255, 0.9);
+			color: #231f20;
+		}
+
+		.sample-result {
+			display: inline-block;
+			margin-top: 12px;
+			padding: 4px 8px;
+			border: 1px solid currentColor;
+			font-size: 12px;
+			font-weight: 700;
+			text-transform: uppercase;
+			background: rgba(255, 255, 255, 0.78);
+			color: #231f20;
+		}
+
+		.sample-result.is-pass {
+			background: #eaf6ee;
+			color: #225f34;
+		}
+
+		.sample-result.is-fail {
+			background: #fdeaea;
+			color: #8f1111;
+		}
+
+		@media (max-width: 520px) {
+			main {
+				padding: 20px;
+			}
+
+			.controls {
+				grid-template-columns: 1fr;
+			}
+
+			.colour-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<main>
+		<h1>Colour Contrast Analyzer</h1>
+		
+		<p>Enter a list of text and background hex colours.  This SPA will render each possible combination at 15px and 30px font size, with WCAG contrast pass/fail checks equivalent to assess color-contrast thresholds.</p>
+
+		<form data-colour-form>
+			<div class="controls">
+				<div class="field">
+					<label for="text-colours">Text colours</label>
+					<textarea id="text-colours" data-text-colours spellcheck="false"></textarea>
+				</div>
+				<div class="field">
+					<label for="background-colours">Background colours</label>
+					<textarea id="background-colours" data-background-colours spellcheck="false"></textarea>
+				</div>
+			</div>
+			<div class="controls-actions">
+				<button class="apply-colours" type="submit">Update Results</button>
+				<p class="input-status" data-input-status aria-live="polite"></p>
+			</div>
+		</form>
+
+		<div class="summary" aria-label="Contrast summary">
+			<button class="summary-item" type="button" data-filter-font-size="15" data-filter-result="pass" aria-pressed="false">
+				<span class="summary-label">15px Pass</span>
+				<span class="summary-value" data-summary="15-pass">0</span>
+			</button>
+			<button class="summary-item" type="button" data-filter-font-size="15" data-filter-result="fail" aria-pressed="false">
+				<span class="summary-label">15px Fail</span>
+				<span class="summary-value" data-summary="15-fail">0</span>
+			</button>
+			<button class="summary-item" type="button" data-filter-font-size="30" data-filter-result="pass" aria-pressed="false">
+				<span class="summary-label">30px Pass</span>
+				<span class="summary-value" data-summary="30-pass">0</span>
+			</button>
+			<button class="summary-item" type="button" data-filter-font-size="30" data-filter-result="fail" aria-pressed="false">
+				<span class="summary-label">30px Fail</span>
+				<span class="summary-value" data-summary="30-fail">0</span>
+			</button>
+		</div>
+
+		<div class="filter-status" aria-live="polite">
+			<p data-filter-status>Showing all colour contrast results.</p>
+			<button class="clear-filter" type="button" data-clear-filter hidden>Show All</button>
+		</div>
+
+		<section aria-labelledby="size-15-heading" data-font-section="15">
+			<h2 id="size-15-heading">15px Text</h2>
+			<div class="colour-grid" data-font-size="15"></div>
+		</section>
+
+		<section aria-labelledby="size-30-heading" data-font-section="30">
+			<h2 id="size-30-heading">30px Text</h2>
+			<div class="colour-grid" data-font-size="30"></div>
+		</section>
+	</main>
+
+	<script>
+		const colours = [];
+		const sampleText = 'The Quick Fox! Jumped Over? The Lazy, Brown Dog.';
+		const pageBackground = { r: 242, g: 242, b: 246, a: 1 };
+		const colourContrastResults = [];
+		const colourForm = document.querySelector('[data-colour-form]');
+		const textColoursInput = document.querySelector('[data-text-colours]');
+		const backgroundColoursInput = document.querySelector('[data-background-colours]');
+		const inputStatus = document.querySelector('[data-input-status]');
+		const filterStatus = document.querySelector('[data-filter-status]');
+		const clearFilter = document.querySelector('[data-clear-filter]');
+		const summaryItems = document.querySelectorAll('[data-filter-font-size]');
+		const sections = document.querySelectorAll('[data-font-section]');
+		
+		let samples = [];
+
+		function uniqueHexValues(items) {
+			return [...new Set(items.map((item) => item.hex.toLowerCase()))];
+		}
+
+		function createHexColour(hex) {
+			return {
+				name: hex,
+				hex,
+				css: hex
+			};
+		}
+
+		function normalizeHex(value) {
+			const trimmed = value.trim();
+			const match = trimmed.match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
+
+			if (!match) {
+				return null;
+			}
+
+			const hex = match[1].toLowerCase();
+			const expandedHex = hex.length === 3
+				? hex.split('').map((character) => character + character).join('')
+				: hex;
+
+			return `#${expandedHex}`;
+		}
+
+		function parseHexList(value) {
+			const entries = value.split(/[\s,;]+/).filter(Boolean);
+			const valid = [];
+			const invalid = [];
+
+			entries.forEach((entry) => {
+				const hex = normalizeHex(entry);
+
+				if (hex) {
+					valid.push(hex);
+				} else {
+					invalid.push(entry);
+				}
+			});
+
+			return {
+				colours: [...new Set(valid)].map(createHexColour),
+				invalid
+			};
+		}
+
+		function colourLabel(colour) {
+			return `${colour.name} ${colour.hex}${colour.alpha ? ` / ${colour.alpha} opacity` : ''}`;
+		}
+
+		function parseColour(value) {
+			if (value.startsWith('#')) {
+				const hex = value.slice(1);
+				return {
+					r: parseInt(hex.slice(0, 2), 16),
+					g: parseInt(hex.slice(2, 4), 16),
+					b: parseInt(hex.slice(4, 6), 16),
+					a: 1
+				};
+			}
+
+			const channels = value
+				.match(/rgba?\(([^)]+)\)/)[1]
+				.split(',')
+				.map((channel) => Number(channel.trim()));
+
+			return {
+				r: channels[0],
+				g: channels[1],
+				b: channels[2],
+				a: channels.length === 4 ? channels[3] : 1
+			};
+		}
+
+		function blend(foreground, background) {
+			const alpha = foreground.a + background.a * (1 - foreground.a);
+
+			return {
+				r: Math.round((foreground.r * foreground.a + background.r * background.a * (1 - foreground.a)) / alpha),
+				g: Math.round((foreground.g * foreground.a + background.g * background.a * (1 - foreground.a)) / alpha),
+				b: Math.round((foreground.b * foreground.a + background.b * background.a * (1 - foreground.a)) / alpha),
+				a: alpha
+			};
+		}
+
+		function relativeChannel(channel) {
+			const value = channel / 255;
+			return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+		}
+
+		function luminance(colour) {
+			return 0.2126 * relativeChannel(colour.r) + 0.7152 * relativeChannel(colour.g) + 0.0722 * relativeChannel(colour.b);
+		}
+
+		function contrastRatio(foreground, background) {
+			const foregroundLuminance = luminance(foreground);
+			const backgroundLuminance = luminance(background);
+			const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+			const darker = Math.min(foregroundLuminance, backgroundLuminance);
+
+			return (lighter + 0.05) / (darker + 0.05);
+		}
+
+		function contrastResult(textColour, backgroundColour, fontSize) {
+			const renderedBackground = blend(parseColour(backgroundColour.css), pageBackground);
+			const renderedText = blend(parseColour(textColour.css), renderedBackground);
+			const ratio = contrastRatio(renderedText, renderedBackground);
+			const isLargeText = Number(fontSize) >= 24;
+			const minimumRatio = isLargeText ? 3 : 4.5;
+			const passes = ratio >= minimumRatio;
+
+			return {
+				passes,
+				ratio,
+				minimumRatio,
+				level: isLargeText ? 'large text' : 'normal text'
+			};
+		}
+
+		function createSample(textColour, backgroundColour, fontSize) {
+			const result = contrastResult(textColour, backgroundColour, fontSize);
+			const sample = document.createElement('article');
+			sample.className = 'colour-sample';
+			sample.style.backgroundColor = backgroundColour.css;
+			sample.style.padding = '20px';
+			sample.style.margin = '20px 0';
+			sample.style.borderRadius = '20px';
+			sample.dataset.fontSize = fontSize;
+			sample.dataset.contrast = result.passes ? 'pass' : 'fail';
+
+			const text = document.createElement('p');
+			text.className = 'sample-text';
+			text.style.color = textColour.css;
+			text.style.backgroundColor = backgroundColour.css;
+			text.style.fontSize = `${fontSize}px`;
+			text.textContent = sampleText;
+
+			const meta = document.createElement('span');
+			meta.className = 'sample-meta';
+			meta.style.color = textColour.css;
+			meta.style.backgroundColor = backgroundColour.css;
+			meta.textContent = `Text: ${colourLabel(textColour)} | Background: ${colourLabel(backgroundColour)}`;
+
+			const status = document.createElement('span');
+			status.className = `sample-result ${result.passes ? 'is-pass' : 'is-fail'}`;
+			status.textContent = `${result.passes ? 'Pass' : 'Fail'} - ${result.ratio.toFixed(2)}:1 contrast, ${result.minimumRatio}:1 required for ${result.level}`;
+
+			colourContrastResults.push({
+				fontSize: `${fontSize}px`,
+				textColour: textColour.name,
+				textHex: textColour.hex,
+				textCss: textColour.css,
+				backgroundColour: backgroundColour.name,
+				backgroundHex: backgroundColour.hex,
+				backgroundCss: backgroundColour.css,
+				contrastRatio: Number(result.ratio.toFixed(2)),
+				requiredRatio: result.minimumRatio,
+				wcagTextSize: result.level,
+				result: result.passes ? 'pass' : 'fail'
+			});
+
+			sample.append(text, meta, status);
+			return sample;
+		}
+
+		function renderResults(textColours, backgroundColours) {
+			colourContrastResults.length = 0;
+			samples = [];
+			document.querySelectorAll('[data-font-size]').forEach((grid) => {
+				const fontSize = grid.getAttribute('data-font-size');
+				const fragment = document.createDocumentFragment();
+				let passes = 0;
+				let fails = 0;
+
+				grid.textContent = '';
+
+				textColours.forEach((textColour) => {
+					backgroundColours.forEach((backgroundColour) => {
+						const sample = createSample(textColour, backgroundColour, fontSize);
+
+						if (sample.dataset.contrast === 'pass') {
+							passes += 1;
+						} else {
+							fails += 1;
+						}
+
+						samples.push(sample);
+						fragment.append(sample);
+					});
+				});
+
+				grid.append(fragment);
+				document.querySelector(`[data-summary="${fontSize}-pass"]`).textContent = passes;
+				document.querySelector(`[data-summary="${fontSize}-fail"]`).textContent = fails;
+			});
+
+			resetFilter();
+			window.colourContrastResults = colourContrastResults;
+			console.table(colourContrastResults);
+		}
+
+		function applyFilter(fontSize, result) {
+			summaryItems.forEach((item) => {
+				const isActive = item.dataset.filterFontSize === fontSize && item.dataset.filterResult === result;
+
+				item.classList.toggle('is-active', isActive);
+				item.setAttribute('aria-pressed', String(isActive));
+			});
+
+			sections.forEach((section) => {
+				section.classList.toggle('is-hidden', section.dataset.fontSection !== fontSize);
+			});
+
+			samples.forEach((sample) => {
+				const isMatch = sample.dataset.fontSize === fontSize && sample.dataset.contrast === result;
+				sample.classList.toggle('is-hidden', !isMatch);
+			});
+
+			filterStatus.textContent = `Showing ${fontSize}px ${result} contrast results.`;
+			clearFilter.hidden = false;
+		}
+
+		function resetFilter() {
+			summaryItems.forEach((item) => {
+				item.classList.remove('is-active');
+				item.setAttribute('aria-pressed', 'false');
+			});
+			sections.forEach((section) => section.classList.remove('is-hidden'));
+			samples.forEach((sample) => sample.classList.remove('is-hidden'));
+			filterStatus.textContent = 'Showing all colour contrast results.';
+			clearFilter.hidden = true;
+		}
+
+		summaryItems.forEach((item) => {
+			item.addEventListener('click', () => {
+				applyFilter(item.dataset.filterFontSize, item.dataset.filterResult);
+			});
+		});
+
+		clearFilter.addEventListener('click', resetFilter);
+
+		colourForm.addEventListener('submit', (event) => {
+			event.preventDefault();
+
+			const textColours = parseHexList(textColoursInput.value);
+			const backgroundColours = parseHexList(backgroundColoursInput.value);
+			const invalidValues = [...textColours.invalid, ...backgroundColours.invalid];
+
+			if (!textColours.colours.length || !backgroundColours.colours.length) {
+				inputStatus.textContent = 'Add at least one valid text colour and one valid background colour.';
+				return;
+			}
+
+			if (invalidValues.length) {
+				inputStatus.textContent = `Ignored invalid hex value${invalidValues.length === 1 ? '' : 's'}: ${invalidValues.join(', ')}`;
+			} else {
+				inputStatus.textContent = '';
+			}
+
+			renderResults(textColours.colours, backgroundColours.colours);
+		});
+
+		const defaultHexList = uniqueHexValues(colours).join('\n');
+		textColoursInput.value = defaultHexList;
+		backgroundColoursInput.value = defaultHexList;
+		renderResults(uniqueHexValues(colours).map(createHexColour), uniqueHexValues(colours).map(createHexColour));
+	</script>
+</body>
+</html>
