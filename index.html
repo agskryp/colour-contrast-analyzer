@@ -19,10 +19,16 @@
 			margin: 0;
 		}
 
-		main {
+		header,
+		main,
+		footer {
 			max-width: 1600px;
 			margin: 0 auto;
 			padding: 32px;
+		}
+
+		footer {
+			text-align: right;
 		}
 
 		h1,
@@ -255,11 +261,13 @@
 </head>
 
 <body>
-	<main>
+	<header>
 		<h1>Colour Contrast Analyzer</h1>
 		
 		<p>Enter a list of text and background hex colours.  This SPA will render each possible combination at 15px and 30px font size, with WCAG contrast pass/fail checks equivalent to assess color-contrast thresholds.</p>
+	</header>
 
+	<main>
 		<form data-colour-form>
 			<div class="controls">
 				<div class="field">
@@ -311,6 +319,10 @@
 			<div class="colour-grid" data-font-size="30"></div>
 		</section>
 	</main>
+
+	<footer>
+		Developed by <a href="https://www.agskryp.com" target="_blank" rel="noopener">A.G. Skryp</a>
+	</footer>
 
 	<script>
 		const colours = [];
