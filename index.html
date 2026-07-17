@@ -8,7 +8,7 @@
 		:root {
 			color: #231f20;
 			font-family: Arial, Helvetica, sans-serif;
-			background: #f2f2f6;
+			background: #f2f9f2;
 		}
 
 		* {
@@ -52,6 +52,45 @@
 			line-height: 1.5;
 		}
 
+		.header-tabs {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 24px;
+			border-bottom: 1px solid rgba(35, 31, 32, 0.18);
+		}
+
+		.header-tab {
+			padding: 10px 14px;
+			border: 1px solid rgba(35, 31, 32, 0.18);
+			border-bottom: 0;
+			background: #ffffff;
+			color: #231f20;
+			font: inherit;
+			font-weight: 700;
+			cursor: pointer;
+		}
+
+		.header-tab:hover,
+		.header-tab:focus-visible,
+		.header-tab[aria-selected="true"] {
+			outline: 2px solid #4476ff;
+			outline-offset: 2px;
+		}
+
+		.header-tab[aria-selected="true"] {
+			background: #231f20;
+			color: #ffffff;
+		}
+
+		.header-tab-panel {
+			padding-top: 4px;
+		}
+
+		.header-tab-panel[hidden] {
+			display: none;
+		}
+
 		.controls {
 			display: grid;
 			grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -62,6 +101,37 @@
 		.field {
 			display: grid;
 			gap: 8px;
+		}
+
+		.text-settings {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 16px;
+			margin-top: 16px;
+			padding: 16px;
+			border: 1px solid rgba(35, 31, 32, 0.18);
+			background: #ffffff;
+		}
+
+		.size-control {
+			display: grid;
+			gap: 8px;
+		}
+
+		.size-control input[type="range"] {
+			width: 100%;
+		}
+
+		.bold-control {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.bold-control input {
+			width: 18px;
+			height: 18px;
+			margin: 0;
 		}
 
 		label {
@@ -207,7 +277,6 @@
 
 		.sample-text {
 			margin: 0;
-			font-weight: 700;
 			line-height: 1.35;
 		}
 
@@ -253,6 +322,10 @@
 				grid-template-columns: 1fr;
 			}
 
+			.text-settings {
+				grid-template-columns: 1fr;
+			}
+
 			.colour-grid {
 				grid-template-columns: 1fr;
 			}
@@ -263,8 +336,24 @@
 <body>
 	<header>
 		<h1>Colour Contrast Analyzer</h1>
-		
-		<p>Enter a list of text and background hex colours.  This SPA will render each possible combination at 15px and 30px font size, with WCAG contrast pass/fail checks equivalent to assess color-contrast thresholds.</p>
+
+		<div class="header-tabs" role="tablist" aria-label="Application information">
+			<button class="header-tab" id="tab-description" type="button" role="tab" aria-selected="true" aria-controls="panel-description" data-header-tab="description">Overview</button>
+			<button class="header-tab" id="tab-instructions" type="button" role="tab" aria-selected="false" aria-controls="panel-instructions" tabindex="-1" data-header-tab="instructions">Instructions</button>
+			<button class="header-tab" id="tab-requirements" type="button" role="tab" aria-selected="false" aria-controls="panel-requirements" tabindex="-1" data-header-tab="requirements">WCAG AA</button>
+		</div>
+
+		<div class="header-tab-panel" id="panel-description" role="tabpanel" aria-labelledby="tab-description" data-header-panel="description">
+			<p>Enter lists of text and background hex colours to render every possible pairing. The analyzer calculates each contrast ratio and reports pass/fail results against WCAG Level AA using the selected sample size and weight.</p>
+		</div>
+
+		<div class="header-tab-panel" id="panel-instructions" role="tabpanel" aria-labelledby="tab-instructions" data-header-panel="instructions" hidden>
+			<p>Add one or more hex values in each textarea, separated by new lines, spaces, commas, or semicolons. Adjust the normal and large text sizes, toggle bold when needed, then select Update Results to refresh the samples and summary counts.</p>
+		</div>
+
+		<div class="header-tab-panel" id="panel-requirements" role="tabpanel" aria-labelledby="tab-requirements" data-header-panel="requirements" hidden>
+			<p>WCAG Level AA requires a contrast ratio of at least 4.5:1 for normal text and 3:1 for large text. Large text is 24px or larger at normal weight, or 18.66px or larger when bold.</p>
+		</div>
 	</header>
 
 	<main>
@@ -279,6 +368,22 @@
 					<textarea id="background-colours" data-background-colours spellcheck="false"></textarea>
 				</div>
 			</div>
+
+			<div class="text-settings" aria-label="Text settings">
+				<div class="size-control">
+					<label for="normal-text-size">Normal text size: <output data-normal-size-output for="normal-text-size">22px</output></label>
+					<input id="normal-text-size" data-normal-size type="range" min="10" max="24" value="22" step="1">
+				</div>
+				<div class="size-control">
+					<label for="large-text-size">Large text size: <output data-large-size-output for="large-text-size">26px</output></label>
+					<input id="large-text-size" data-large-size type="range" min="24" max="72" value="26" step="1">
+				</div>
+				<label class="bold-control" for="bold-text">
+					<input id="bold-text" data-bold-text type="checkbox">
+					Bold text
+				</label>
+			</div>
+
 			<div class="controls-actions">
 				<button class="apply-colours" type="submit">Update Results</button>
 				<p class="input-status" data-input-status aria-live="polite"></p>
@@ -286,21 +391,21 @@
 		</form>
 
 		<div class="summary" aria-label="Contrast summary">
-			<button class="summary-item" type="button" data-filter-font-size="15" data-filter-result="pass" aria-pressed="false">
-				<span class="summary-label">15px Pass</span>
-				<span class="summary-value" data-summary="15-pass">0</span>
+			<button class="summary-item" type="button" data-filter-text-role="normal" data-filter-result="pass" aria-pressed="false">
+				<span class="summary-label" data-summary-label="normal-pass">Normal 22px Pass</span>
+				<span class="summary-value" data-summary="normal-pass">0</span>
 			</button>
-			<button class="summary-item" type="button" data-filter-font-size="15" data-filter-result="fail" aria-pressed="false">
-				<span class="summary-label">15px Fail</span>
-				<span class="summary-value" data-summary="15-fail">0</span>
+			<button class="summary-item" type="button" data-filter-text-role="normal" data-filter-result="fail" aria-pressed="false">
+				<span class="summary-label" data-summary-label="normal-fail">Normal 22px Fail</span>
+				<span class="summary-value" data-summary="normal-fail">0</span>
 			</button>
-			<button class="summary-item" type="button" data-filter-font-size="30" data-filter-result="pass" aria-pressed="false">
-				<span class="summary-label">30px Pass</span>
-				<span class="summary-value" data-summary="30-pass">0</span>
+			<button class="summary-item" type="button" data-filter-text-role="large" data-filter-result="pass" aria-pressed="false">
+				<span class="summary-label" data-summary-label="large-pass">Large 26px Pass</span>
+				<span class="summary-value" data-summary="large-pass">0</span>
 			</button>
-			<button class="summary-item" type="button" data-filter-font-size="30" data-filter-result="fail" aria-pressed="false">
-				<span class="summary-label">30px Fail</span>
-				<span class="summary-value" data-summary="30-fail">0</span>
+			<button class="summary-item" type="button" data-filter-text-role="large" data-filter-result="fail" aria-pressed="false">
+				<span class="summary-label" data-summary-label="large-fail">Large 26px Fail</span>
+				<span class="summary-value" data-summary="large-fail">0</span>
 			</button>
 		</div>
 
@@ -309,14 +414,14 @@
 			<button class="clear-filter" type="button" data-clear-filter hidden>Show All</button>
 		</div>
 
-		<section aria-labelledby="size-15-heading" data-font-section="15">
-			<h2 id="size-15-heading">15px Text</h2>
-			<div class="colour-grid" data-font-size="15"></div>
+		<section aria-labelledby="normal-text-heading" data-text-section="normal">
+			<h2 id="normal-text-heading" data-section-heading="normal">Normal Text - 22px</h2>
+			<div class="colour-grid" data-text-role="normal"></div>
 		</section>
 
-		<section aria-labelledby="size-30-heading" data-font-section="30">
-			<h2 id="size-30-heading">30px Text</h2>
-			<div class="colour-grid" data-font-size="30"></div>
+		<section aria-labelledby="large-text-heading" data-text-section="large">
+			<h2 id="large-text-heading" data-section-heading="large">Large Text - 26px</h2>
+			<div class="colour-grid" data-text-role="large"></div>
 		</section>
 	</main>
 
@@ -327,18 +432,37 @@
 	<script>
 		const colours = [];
 		const sampleText = 'The Quick Fox! Jumped Over? The Lazy, Brown Dog.';
-		const pageBackground = { r: 242, g: 242, b: 246, a: 1 };
 		const colourContrastResults = [];
 		const colourForm = document.querySelector('[data-colour-form]');
 		const textColoursInput = document.querySelector('[data-text-colours]');
 		const backgroundColoursInput = document.querySelector('[data-background-colours]');
+		const normalSizeInput = document.querySelector('[data-normal-size]');
+		const largeSizeInput = document.querySelector('[data-large-size]');
+		const normalSizeOutput = document.querySelector('[data-normal-size-output]');
+		const largeSizeOutput = document.querySelector('[data-large-size-output]');
+		const boldTextInput = document.querySelector('[data-bold-text]');
 		const inputStatus = document.querySelector('[data-input-status]');
 		const filterStatus = document.querySelector('[data-filter-status]');
 		const clearFilter = document.querySelector('[data-clear-filter]');
-		const summaryItems = document.querySelectorAll('[data-filter-font-size]');
-		const sections = document.querySelectorAll('[data-font-section]');
+		const summaryItems = document.querySelectorAll('[data-filter-text-role]');
+		const sections = document.querySelectorAll('[data-text-section]');
+		const headerTabs = document.querySelectorAll('[data-header-tab]');
+		const headerPanels = document.querySelectorAll('[data-header-panel]');
 		
 		let samples = [];
+
+		function selectHeaderTab(tab) {
+			headerTabs.forEach((item) => {
+				const isSelected = item === tab;
+
+				item.setAttribute('aria-selected', String(isSelected));
+				item.tabIndex = isSelected ? 0 : -1;
+			});
+
+			headerPanels.forEach((panel) => {
+				panel.hidden = panel.dataset.headerPanel !== tab.dataset.headerTab;
+			});
+		}
 
 		function uniqueHexValues(items) {
 			return [...new Set(items.map((item) => item.hex.toLowerCase()))];
@@ -446,11 +570,15 @@
 			return (lighter + 0.05) / (darker + 0.05);
 		}
 
-		function contrastResult(textColour, backgroundColour, fontSize) {
-			const renderedBackground = blend(parseColour(backgroundColour.css), pageBackground);
+		function isWcagLargeText(fontSize, isBold) {
+			return fontSize >= 24 || (isBold && fontSize >= 18.66);
+		}
+
+		function contrastResult(textColour, backgroundColour, textSetting) {
+			const renderedBackground = parseColour(backgroundColour.css);
 			const renderedText = blend(parseColour(textColour.css), renderedBackground);
 			const ratio = contrastRatio(renderedText, renderedBackground);
-			const isLargeText = Number(fontSize) >= 24;
+			const isLargeText = isWcagLargeText(textSetting.fontSize, textSetting.isBold);
 			const minimumRatio = isLargeText ? 3 : 4.5;
 			const passes = ratio >= minimumRatio;
 
@@ -462,22 +590,23 @@
 			};
 		}
 
-		function createSample(textColour, backgroundColour, fontSize) {
-			const result = contrastResult(textColour, backgroundColour, fontSize);
+		function createSample(textColour, backgroundColour, textSetting) {
+			const result = contrastResult(textColour, backgroundColour, textSetting);
 			const sample = document.createElement('article');
 			sample.className = 'colour-sample';
 			sample.style.backgroundColor = backgroundColour.css;
 			sample.style.padding = '20px';
 			sample.style.margin = '20px 0';
 			sample.style.borderRadius = '20px';
-			sample.dataset.fontSize = fontSize;
+			sample.dataset.textRole = textSetting.role;
 			sample.dataset.contrast = result.passes ? 'pass' : 'fail';
 
 			const text = document.createElement('p');
 			text.className = 'sample-text';
 			text.style.color = textColour.css;
 			text.style.backgroundColor = backgroundColour.css;
-			text.style.fontSize = `${fontSize}px`;
+			text.style.fontSize = `${textSetting.fontSize}px`;
+			text.style.fontWeight = textSetting.isBold ? '700' : '400';
 			text.textContent = sampleText;
 
 			const meta = document.createElement('span');
@@ -491,7 +620,9 @@
 			status.textContent = `${result.passes ? 'Pass' : 'Fail'} - ${result.ratio.toFixed(2)}:1 contrast, ${result.minimumRatio}:1 required for ${result.level}`;
 
 			colourContrastResults.push({
-				fontSize: `${fontSize}px`,
+				textRole: textSetting.role,
+				fontSize: `${textSetting.fontSize}px`,
+				fontWeight: textSetting.isBold ? 'bold' : 'normal',
 				textColour: textColour.name,
 				textHex: textColour.hex,
 				textCss: textColour.css,
@@ -508,11 +639,49 @@
 			return sample;
 		}
 
+		function currentTextSettings() {
+			const isBold = boldTextInput.checked;
+
+			return [
+				{
+					role: 'normal',
+					label: 'Normal',
+					fontSize: Number(normalSizeInput.value),
+					isBold
+				},
+				{
+					role: 'large',
+					label: 'Large',
+					fontSize: Number(largeSizeInput.value),
+					isBold
+				}
+			];
+		}
+
+		function updateTextSettingLabels(settings) {
+			settings.forEach((setting) => {
+				const sizeLabel = `${setting.label} ${setting.fontSize}px${setting.isBold ? ' Bold' : ''}`;
+				const sectionHeading = document.querySelector(`[data-section-heading="${setting.role}"]`);
+
+				sectionHeading.textContent = `${setting.label} Text - ${setting.fontSize}px${setting.isBold ? ' Bold' : ''}`;
+				document.querySelector(`[data-summary-label="${setting.role}-pass"]`).textContent = `${sizeLabel} Pass`;
+				document.querySelector(`[data-summary-label="${setting.role}-fail"]`).textContent = `${sizeLabel} Fail`;
+			});
+		}
+
+		function updateSizeOutputs() {
+			normalSizeOutput.textContent = `${normalSizeInput.value}px`;
+			largeSizeOutput.textContent = `${largeSizeInput.value}px`;
+		}
+
 		function renderResults(textColours, backgroundColours) {
+			const textSettings = currentTextSettings();
+
+			updateTextSettingLabels(textSettings);
 			colourContrastResults.length = 0;
 			samples = [];
-			document.querySelectorAll('[data-font-size]').forEach((grid) => {
-				const fontSize = grid.getAttribute('data-font-size');
+			document.querySelectorAll('.colour-grid[data-text-role]').forEach((grid) => {
+				const textSetting = textSettings.find((setting) => setting.role === grid.dataset.textRole);
 				const fragment = document.createDocumentFragment();
 				let passes = 0;
 				let fails = 0;
@@ -521,7 +690,7 @@
 
 				textColours.forEach((textColour) => {
 					backgroundColours.forEach((backgroundColour) => {
-						const sample = createSample(textColour, backgroundColour, fontSize);
+						const sample = createSample(textColour, backgroundColour, textSetting);
 
 						if (sample.dataset.contrast === 'pass') {
 							passes += 1;
@@ -535,8 +704,8 @@
 				});
 
 				grid.append(fragment);
-				document.querySelector(`[data-summary="${fontSize}-pass"]`).textContent = passes;
-				document.querySelector(`[data-summary="${fontSize}-fail"]`).textContent = fails;
+				document.querySelector(`[data-summary="${textSetting.role}-pass"]`).textContent = passes;
+				document.querySelector(`[data-summary="${textSetting.role}-fail"]`).textContent = fails;
 			});
 
 			resetFilter();
@@ -544,24 +713,24 @@
 			console.table(colourContrastResults);
 		}
 
-		function applyFilter(fontSize, result) {
+		function applyFilter(textRole, result) {
 			summaryItems.forEach((item) => {
-				const isActive = item.dataset.filterFontSize === fontSize && item.dataset.filterResult === result;
+				const isActive = item.dataset.filterTextRole === textRole && item.dataset.filterResult === result;
 
 				item.classList.toggle('is-active', isActive);
 				item.setAttribute('aria-pressed', String(isActive));
 			});
 
 			sections.forEach((section) => {
-				section.classList.toggle('is-hidden', section.dataset.fontSection !== fontSize);
+				section.classList.toggle('is-hidden', section.dataset.textSection !== textRole);
 			});
 
 			samples.forEach((sample) => {
-				const isMatch = sample.dataset.fontSize === fontSize && sample.dataset.contrast === result;
+				const isMatch = sample.dataset.textRole === textRole && sample.dataset.contrast === result;
 				sample.classList.toggle('is-hidden', !isMatch);
 			});
 
-			filterStatus.textContent = `Showing ${fontSize}px ${result} contrast results.`;
+			filterStatus.textContent = `Showing ${textRole} ${result} contrast results.`;
 			clearFilter.hidden = false;
 		}
 
@@ -578,14 +747,46 @@
 
 		summaryItems.forEach((item) => {
 			item.addEventListener('click', () => {
-				applyFilter(item.dataset.filterFontSize, item.dataset.filterResult);
+				applyFilter(item.dataset.filterTextRole, item.dataset.filterResult);
 			});
 		});
 
 		clearFilter.addEventListener('click', resetFilter);
 
+		headerTabs.forEach((tab, index) => {
+			tab.addEventListener('click', () => {
+				selectHeaderTab(tab);
+			});
+
+			tab.addEventListener('keydown', (event) => {
+				const lastIndex = headerTabs.length - 1;
+				let nextIndex = index;
+
+				if (event.key === 'ArrowRight') {
+					nextIndex = index === lastIndex ? 0 : index + 1;
+				} else if (event.key === 'ArrowLeft') {
+					nextIndex = index === 0 ? lastIndex : index - 1;
+				} else if (event.key === 'Home') {
+					nextIndex = 0;
+				} else if (event.key === 'End') {
+					nextIndex = lastIndex;
+				} else {
+					return;
+				}
+
+				event.preventDefault();
+				headerTabs[nextIndex].focus();
+				selectHeaderTab(headerTabs[nextIndex]);
+			});
+		});
+
+		[normalSizeInput, largeSizeInput].forEach((input) => {
+			input.addEventListener('input', updateSizeOutputs);
+		});
+
 		colourForm.addEventListener('submit', (event) => {
 			event.preventDefault();
+			updateSizeOutputs();
 
 			const textColours = parseHexList(textColoursInput.value);
 			const backgroundColours = parseHexList(backgroundColoursInput.value);
@@ -608,6 +809,7 @@
 		const defaultHexList = uniqueHexValues(colours).join('\n');
 		textColoursInput.value = defaultHexList;
 		backgroundColoursInput.value = defaultHexList;
+		updateSizeOutputs();
 		renderResults(uniqueHexValues(colours).map(createHexColour), uniqueHexValues(colours).map(createHexColour));
 	</script>
 </body>
