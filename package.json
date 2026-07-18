@@ -1,0 +1,32 @@
+{
+  "name": "colour-contrast-analyzer",
+  "version": "1.0.0",
+  "description": "",
+	"scripts": {
+		"compile:sass": "sass src/sass/main.scss dist/style.css --style=compressed",
+    "compile:main-js": "esbuild js/main.js --minify --outfile=dist/main.js",
+    "compile": "npm-run-all --parallel compile:sass compile:main-js",
+    "watch:sass": "sass --watch src/sass/main.scss dist/style.css --style=expanded",
+    "watch:main-js": "esbuild --watch js/main.js --minify --outfile=dist/main.js",
+    "watch": "npm-run-all --parallel watch:sass watch:main-js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agskryp/colour-contrast-analyzer.git"
+  },
+  "author": "a.g.skryp",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/agskryp/colour-contrast-analyzer/issues"
+  },
+  "homepage": "https://www.agskryp.com",
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "npm-run-all": "^4.1.5",
+    "sass": "^1.101.0"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.5.6": true,
+    "esbuild@0.28.1": true
+  }
+}
