@@ -20,15 +20,38 @@
 		</div>
 
 		<div class="header-tab-panel" id="panel-description" role="tabpanel" aria-labelledby="tab-description" data-header-panel="description">
-			<p>Enter lists of text and background hex colours to render every possible pairing. The analyzer calculates each contrast ratio and reports pass/fail results against WCAG Level AA using the selected sample size and weight.</p>
+			<p>The Colour Contrast Analyzer is a single page application that calculates the contrast ratio of the colour pairings between text and background, and reports a pass or fail according to WCAG AA standards.</p>
 		</div>
 
 		<div class="header-tab-panel" id="panel-instructions" role="tabpanel" aria-labelledby="tab-instructions" data-header-panel="instructions" hidden>
-			<p>Add one or more hex values in each textarea, separated by new lines, spaces, commas, or semicolons. Adjust the normal and large text sizes, toggle bold when needed, then select Update Results to refresh the samples and summary counts.</p>
+			<ol>
+				<li>Add a three or six digit hex values in each textarea.  
+					<ul>
+						<li>You can add as many values as needed, separating the values by new lines, spaces, commas, or semicolons.</li>
+						<li>Hashtags are optional</li>
+					</ul>
+				</li>
+				<li>Set the normal and large text sizes as necessary.</li>
+				<li>The Bold toggle will set the font weight to 700 when on, and 400 when off.</li>  <li>Select Update Results to refresh the samples and summary counts.</li>
+			</ul>
 		</div>
 
 		<div class="header-tab-panel" id="panel-requirements" role="tabpanel" aria-labelledby="tab-requirements" data-header-panel="requirements" hidden>
-			<p>WCAG Level AA requires a contrast ratio of at least 4.5:1 for normal text and 3:1 for large text. Large text is 24px or larger at normal weight, or 18.66px or larger when bold.</p>
+			<h2>Normal Text</h2>
+			
+			<ul>
+				<li>Requires a contrast ratio of at least 4.5:1.</li>
+				<li>Considered anything smaller than 24px, or 19px if bold.</li>
+			</ul>
+
+			<h2>Large Text</h2>
+			
+			<ul>
+				<li>Requires a contrast ratio of at least 3:1.</li>
+				<li>Considered anything 24px (or 19px if bold) and larger.</li>
+			</ul>
+
+			<p>Bold is considered a font weight of 700 or more.</p>
 		</div>
 	</header>
 

@@ -1,7 +1,7 @@
 {
   "name": "colour-contrast-analyzer",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "The Colour Contrast Analyzer is a single page application that calculates the contrast ratio of the colour pairings between text and background, and reports a pass or fail according to WCAG AA standards.",
 	"scripts": {
 		"compile:sass": "sass src/sass/main.scss dist/style.css --style=compressed",
     "compile:main-js": "esbuild js/main.js --minify --outfile=dist/main.js",
